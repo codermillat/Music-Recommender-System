@@ -6,25 +6,37 @@ class ContentBasedRecommender:
     def __init__(self):
         self.cv = CountVectorizer()
         self.cosine_sim = None
-        self.indices = None
         self.df = None
         
     def prepare_features(self, df):
-        df['combined_features'] = df.apply(
-            lambda row: f"{row['user_id']} {row['song_id']} {row['artist_name']} {row['release']}",
-            axis=1
-        )
-        return df
+        try:
+            return df.apply(
+                lambda x: f"{x['artist_name']} {x['release']}",
+                axis=1
+            )
+        except Exception as e:
+            raise Exception(f"Error preparing features: {str(e)}")
         
     def fit(self, df):
-        self.df = self.prepare_features(df)
-        count_matrix = self.cv.fit_transform(self.df['combined_features'])
-        self.cosine_sim = cosine_similarity(count_matrix)
-        self.indices = pd.Series(self.df.index)
+        try:
+            self.df = df
+            features = self.prepare_features(df)
+            count_matrix = self.cv.fit_transform(features)
+            self.cosine_sim = cosine_similarity(count_matrix)
+        except Exception as e:
+            raise Exception(f"Error fitting model: {str(e)}")
         
-    def recommend(self, song_id, n_recommendations=10):
-        idx = self.indices[self.indices == song_id].index[0]
-        score_series = pd.Series(self.cosine_sim[idx]).sort_values(ascending=False)
-        top_indices = list(score_series.iloc[1:n_recommendations + 1].index)
-        
-        return [list(self.df.index)[i] for i in top_indices]
+    def recommend(self, song_id, n_recommendations=5):
+        try:
+            if self.df is None or self.cosine_sim is None:
+                raise Exception("Model not fitted. Call fit() first.")
+                
+            idx = self.df[self.df['song_id'] == song_id].index[0]
+            sim_scores = list(enumerate(self.cosine_sim[idx]))
+            sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+            sim_scores = sim_scores[1:n_recommendations+1]
+            song_indices = [i[0] for i in sim_scores]
+            
+            return self.df.iloc[song_indices][['artist_name', 'release', 'song_id']]
+        except Exception as e:
+            raise Exception(f"Error generating recommendations: {str(e)}")
