@@ -12,133 +12,100 @@ st.set_page_config(
     layout="wide"
 )
 
-# Initialize data and models
 @st.cache_data
 def load_data():
-    data_loader = DataLoader(
-        'data/kaggle_visible_evaluation_triplets.txt',
-        'data/unique_tracks.txt'
-    )
+    data_loader = DataLoader()
     return data_loader.merge_data()
 
-def initialize_models(df):
+def main():
+    st.title("🎵 Music Recommender System")
+    st.markdown("""
+    This system provides music recommendations using three different approaches:
+    - 🔥 **Popularity-Based**: Recommends the most popular songs
+    - 👥 **Collaborative Filtering**: Recommends based on similar users' preferences
+    - 📝 **Content-Based**: Recommends based on song characteristics
+    """)
+
+    # Load data
+    with st.spinner("Loading data..."):
+        df = load_data()
+
+    # Initialize recommenders
     pop_rec = PopularityRecommender()
-    pop_rec.create(df, 'user_id', 'song_id')
-    
     collab_rec = CollaborativeRecommender()
-    collab_data = collab_rec.prepare_data(df)
-    collab_rec.train(collab_data)
-    
     content_rec = ContentBasedRecommender()
-    content_rec.fit(df)
-    
-    return pop_rec, collab_rec, content_rec
 
-# Main UI
-st.title("🎵 Music Recommender System")
-st.markdown("""
-This system provides music recommendations using three different approaches:
-- 🔥 **Popularity-Based**: Recommends the most popular songs
-- 👥 **Collaborative Filtering**: Recommends based on similar users' preferences
-- 📝 **Content-Based**: Recommends based on song characteristics
-""")
+    # Sidebar navigation
+    page = st.sidebar.radio("Select a Page", [
+        "Dashboard",
+        "Popularity-Based",
+        "Collaborative Filtering",
+        "Content-Based"
+    ])
 
-# Load data
-with st.spinner("Loading data..."):
-    df = load_data()
-    pop_rec, collab_rec, content_rec = initialize_models(df)
-
-# Sidebar
-st.sidebar.title("Navigation")
-page = st.sidebar.radio("Select a Page", [
-    "Dashboard",
-    "Popularity-Based Recommendations",
-    "Collaborative Filtering",
-    "Content-Based Recommendations"
-])
-
-if page == "Dashboard":
-    # Analytics Dashboard
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("Top Artists")
-        top_artists = df.groupby('artist_name')['freq'].sum().sort_values(ascending=False).head(10)
-        fig = px.bar(
-            top_artists,
-            orientation='h',
-            title="Most Popular Artists",
-            labels={'artist_name': 'Artist', 'freq': 'Play Count'}
-        )
-        st.plotly_chart(fig)
-    
-    with col2:
-        st.subheader("Listening Patterns")
-        listen_dist = px.histogram(
-            df,
-            x='freq',
-            nbins=50,
-            title="Distribution of Play Counts",
-            labels={'freq': 'Play Count', 'count': 'Number of Songs'}
-        )
-        st.plotly_chart(listen_dist)
-    
-    # Dataset Statistics
-    st.subheader("Dataset Statistics")
-    col3, col4, col5 = st.columns(3)
-    col3.metric("Total Users", len(df['user_id'].unique()))
-    col4.metric("Total Songs", len(df['song_id'].unique()))
-    col5.metric("Total Artists", len(df['artist_name'].unique()))
-
-elif page == "Popularity-Based Recommendations":
-    st.header("Popular Songs")
-    
-    recommendations = pop_rec.recommend(df['user_id'].iloc[0])
-    
-    st.dataframe(
-        recommendations[['song_id', 'score', 'Rank']]
-        .merge(df[['song_id', 'artist_name', 'release']], on='song_id')
-        .drop_duplicates()
-    )
-
-elif page == "Collaborative Filtering":
-    st.header("User-Based Recommendations")
-    
-    user_id = st.selectbox(
-        "Select a User ID",
-        options=df['user_id'].unique()[:100]  # Limit for demo
-    )
-    
-    if st.button("Get Recommendations"):
-        with st.spinner("Generating recommendations..."):
-            user_data = df[df['user_id'] == user_id]
-            st.subheader("User's Listening History")
-            st.dataframe(
-                user_data[['artist_name', 'release', 'freq']]
-                .sort_values('freq', ascending=False)
+    if page == "Dashboard":
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.subheader("Top Artists")
+            top_artists = df.groupby('artist_name')['freq'].sum().sort_values(ascending=False).head(10)
+            fig = px.bar(
+                top_artists,
+                orientation='h',
+                title="Most Popular Artists"
             )
+            st.plotly_chart(fig)
+        
+        with col2:
+            st.subheader("Listening Patterns")
+            fig = px.histogram(
+                df,
+                x='freq',
+                nbins=50,
+                title="Distribution of Play Counts"
+            )
+            st.plotly_chart(fig)
 
-elif page == "Content-Based Recommendations":
-    st.header("Similar Songs")
-    
-    song_id = st.selectbox(
-        "Select a Song ID",
-        options=df['song_id'].unique()[:100]  # Limit for demo
-    )
-    
-    if st.button("Find Similar Songs"):
-        with st.spinner("Finding similar songs..."):
-            similar_songs = content_rec.recommend(song_id)
-            song_details = df[df['song_id'].isin(similar_songs)][
-                ['song_id', 'artist_name', 'release']
-            ].drop_duplicates()
-            
-            st.subheader("Selected Song")
-            selected_song = df[df['song_id'] == song_id][
-                ['artist_name', 'release']
-            ].iloc[0]
-            st.write(f"Artist: {selected_song['artist_name']}")
-            st.write(f"Title: {selected_song['release']}")
-            
-            st.subheader("Similar Songs")
-            st.dataframe(song_details)
+        col3, col4, col5 = st.columns(3)
+        col3.metric("Total Users", f"{df['user_id'].nunique():,}")
+        col4.metric("Total Songs", f"{df['song_id'].nunique():,}")
+        col5.metric("Total Artists", f"{df['artist_name'].nunique():,}")
+
+    elif page == "Popularity-Based":
+        st.header("Popular Songs")
+        pop_rec.fit(df)
+        recommendations = pop_rec.recommend()
+        st.dataframe(recommendations)
+
+    elif page == "Collaborative Filtering":
+        st.header("User-Based Recommendations")
+        user_id = st.selectbox("Select a User ID", df['user_id'].unique()[:100])
+        
+        if st.button("Get Recommendations"):
+            with st.spinner("Generating recommendations..."):
+                data = collab_rec.prepare_data(df)
+                collab_rec.train(data)
+                recommendations = collab_rec.recommend_songs(user_id, df)
+                
+                results = []
+                for pred in recommendations:
+                    song_info = df[df['song_id'] == pred.iid].iloc[0]
+                    results.append({
+                        'Artist': song_info['artist_name'],
+                        'Song': song_info['release'],
+                        'Score': f"{pred.est:.2f}"
+                    })
+                st.dataframe(pd.DataFrame(results))
+
+    elif page == "Content-Based":
+        st.header("Similar Songs")
+        song_id = st.selectbox("Select a Song ID", df['song_id'].unique()[:100])
+        
+        if st.button("Find Similar Songs"):
+            with st.spinner("Finding similar songs..."):
+                content_rec.fit(df)
+                similar_songs = content_rec.recommend(song_id)
+                st.dataframe(similar_songs[['artist_name', 'release']])
+
+if __name__ == "__main__":
+    main()

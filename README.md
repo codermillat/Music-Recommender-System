@@ -1,6 +1,6 @@
 # Music Recommender System
 
-A comprehensive music recommendation system using collaborative filtering, content-based, and popularity-based approaches, designed for Google Colab and Kaggle environments.
+A comprehensive music recommendation system using collaborative filtering, content-based, and popularity-based approaches, optimized for Google Colab.
 
 ## Features
 
@@ -11,25 +11,35 @@ A comprehensive music recommendation system using collaborative filtering, conte
 2. **Collaborative Filtering**
    - User-based approach using KNN with Means
    - Cosine similarity metric
-   - k=50 neighbors
+   - Optimized for sparse matrices
 
 3. **Content-Based Recommender**
    - Uses song metadata (artist, title)
    - TF-IDF vectorization
-   - Cosine similarity for recommendations
+   - Efficient similarity computation
+
+## Usage in Google Colab
+
+1. Clone the repository:
+```python
+!git clone https://github.com/your-username/music-recommender.git
+```
+
+2. Install dependencies:
+```python
+!pip install -r requirements.txt
+```
+
+3. Run the Streamlit app:
+```python
+!streamlit run app.py
+```
 
 ## Dataset Structure
 
+The dataset should be placed in the `/data` directory:
 - `kaggle_visible_evaluation_triplets.txt`: User listening history
 - `unique_tracks.txt`: Song metadata
-- `taste_profile_song_to_tracks.txt`: Song to track mappings
-
-## Usage
-
-1. Upload the notebook to Google Colab or Kaggle
-2. Upload the dataset files to the `/data` directory
-3. Run all cells sequentially
-4. Explore different recommendation approaches
 
 ## Requirements
 

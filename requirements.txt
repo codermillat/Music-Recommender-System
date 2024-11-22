@@ -4,3 +4,5 @@ scikit-learn==0.24.2
 scikit-surprise==1.1.1
 matplotlib==3.4.2
 seaborn==0.11.1
+streamlit==1.28.0
+plotly==5.18.0
