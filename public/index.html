@@ -4,61 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music Recommender System</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-4xl font-bold mb-8 text-center">🎵 Music Recommender System</h1>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <!-- Top Artists Chart -->
-            <div class="bg-white p-6 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-semibold mb-4">Top Artists</h2>
-                <div id="topArtistsChart"></div>
-            </div>
-            
-            <!-- Listening Patterns Chart -->
-            <div class="bg-white p-6 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-semibold mb-4">Listening Patterns</h2>
-                <div id="listeningPatternsChart"></div>
-            </div>
+        <!-- Popular Songs -->
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Popular Songs</h2>
+            <div id="popularSongs" class="space-y-4"></div>
         </div>
 
-        <!-- Recommendation Sections -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Popular Recommendations -->
-            <div class="bg-white p-6 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-semibold mb-4">Popular Songs</h2>
-                <div id="popularSongs" class="space-y-4"></div>
-            </div>
+        <!-- Collaborative Filtering -->
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+            <h2 class="text-2xl font-semibold mb-4">User Recommendations</h2>
+            <input type="text" id="userId" placeholder="Enter User ID" 
+                   class="w-full p-2 border rounded mb-4">
+            <button onclick="getCollaborativeRecommendations()" 
+                    class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                Get Recommendations
+            </button>
+            <div id="collaborativeRecs" class="mt-4 space-y-4"></div>
+        </div>
 
-            <!-- Collaborative Filtering -->
-            <div class="bg-white p-6 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-semibold mb-4">User Recommendations</h2>
-                <input type="text" id="userId" placeholder="Enter User ID" 
-                       class="w-full p-2 border rounded mb-4">
-                <button onclick="getCollaborativeRecommendations()" 
-                        class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-                    Get Recommendations
-                </button>
-                <div id="collaborativeRecs" class="mt-4 space-y-4"></div>
-            </div>
-
-            <!-- Content-Based -->
-            <div class="bg-white p-6 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-semibold mb-4">Similar Songs</h2>
-                <input type="text" id="songId" placeholder="Enter Song ID"
-                       class="w-full p-2 border rounded mb-4">
-                <button onclick="getContentBasedRecommendations()"
-                        class="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">
-                    Find Similar Songs
-                </button>
-                <div id="contentRecs" class="mt-4 space-y-4"></div>
-            </div>
+        <!-- Content-Based -->
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4">Similar Songs</h2>
+            <input type="text" id="songId" placeholder="Enter Song ID"
+                   class="w-full p-2 border rounded mb-4">
+            <button onclick="getContentBasedRecommendations()"
+                    class="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">
+                Find Similar Songs
+            </button>
+            <div id="contentRecs" class="mt-4 space-y-4"></div>
         </div>
     </div>
-
-    <script src="js/app.js"></script>
+    <script src="/js/app.js"></script>
 </body>
 </html>

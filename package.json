@@ -2,11 +2,13 @@
   "name": "music-recommender",
   "version": "1.0.0",
   "description": "Music Recommender System",
+  "type": "module",
   "scripts": {
-    "start": "python -m streamlit run app.py",
-    "install": "python -m pip install -r requirements.txt"
+    "start": "node server.js"
   },
   "dependencies": {
-    "python-shell": "^5.0.0"
+    "express": "^4.18.2",
+    "python-shell": "^5.0.0",
+    "cors": "^2.8.5"
   }
 }

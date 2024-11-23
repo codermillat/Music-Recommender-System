@@ -1,6 +1,4 @@
 import streamlit as st
-import pandas as pd
-import plotly.express as px
 from src.data_loader import DataLoader
 from src.recommenders.popularity_based import PopularityRecommender
 from src.recommenders.collaborative import CollaborativeRecommender
@@ -44,38 +42,17 @@ def main():
     ])
 
     if page == "Dashboard":
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.subheader("Top Artists")
-            top_artists = df.groupby('artist_name')['freq'].sum().sort_values(ascending=False).head(10)
-            fig = px.bar(
-                top_artists,
-                orientation='h',
-                title="Most Popular Artists"
-            )
-            st.plotly_chart(fig)
-        
-        with col2:
-            st.subheader("Listening Patterns")
-            fig = px.histogram(
-                df,
-                x='freq',
-                nbins=50,
-                title="Distribution of Play Counts"
-            )
-            st.plotly_chart(fig)
-
-        col3, col4, col5 = st.columns(3)
-        col3.metric("Total Users", f"{df['user_id'].nunique():,}")
-        col4.metric("Total Songs", f"{df['song_id'].nunique():,}")
-        col5.metric("Total Artists", f"{df['artist_name'].nunique():,}")
+        st.subheader("Dataset Statistics")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Total Users", f"{df['user_id'].nunique():,}")
+        col2.metric("Total Songs", f"{df['song_id'].nunique():,}")
+        col3.metric("Total Artists", f"{df['artist_name'].nunique():,}")
 
     elif page == "Popularity-Based":
         st.header("Popular Songs")
         pop_rec.fit(df)
         recommendations = pop_rec.recommend()
-        st.dataframe(recommendations)
+        st.dataframe(recommendations[['artist_name', 'release', 'freq']])
 
     elif page == "Collaborative Filtering":
         st.header("User-Based Recommendations")
@@ -95,7 +72,7 @@ def main():
                         'Song': song_info['release'],
                         'Score': f"{pred.est:.2f}"
                     })
-                st.dataframe(pd.DataFrame(results))
+                st.dataframe(results)
 
     elif page == "Content-Based":
         st.header("Similar Songs")
