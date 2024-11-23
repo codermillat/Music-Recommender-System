@@ -22,7 +22,7 @@ A comprehensive music recommendation system using collaborative filtering, conte
 
 1. Clone the repository:
 ```python
-!git clone https://github.com/your-username/music-recommender.git
+!git clone https://github.com/codermillat/Music-Recommender-System.git
 ```
 
 2. Install dependencies:
